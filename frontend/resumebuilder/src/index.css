@@ -41,8 +41,16 @@
   .animate-text-shine {
     animation: text-shine 3s ease-in-out infinite alternate;
   }
+
+  .gradient-text {
+    background-image: radial-gradient(circle, #7182ff 0%, #3cff52 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
   .input-box {
-    @apply w-full flex justify-between gap-3 text-sm gap-3 text-sm text-black bg-gray-50/50 rounded px-4 py-3 mb-4 mt-3 border-gray-100 outline-none focus-within:border-purple-100;
+    @apply w-full flex justify-between gap-3 text-sm text-black bg-gray-50/50 rounded px-4 py-3 mb-4 mt-3 border-gray-100 outline-none focus-within:border-purple-100;
   }
   .btn-primary {
     @apply w-full text-sm font-medium text-white bg-black shadow-lg shadow-purple-600/5 p-[18px] rounded-md  my-1 hover:bg-purple-600/15 hover:text-black cursor-pointer;
