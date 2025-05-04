@@ -5,7 +5,7 @@ const path = require("path");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
-
+const resumeRoutes = require("./routes/resumeRoutes");
 const app = express();
 
 // Middleware to handle CORS
@@ -25,7 +25,17 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
-// app.use("/api/resume", resumeRoutes);
+app.use("/api/resume", resumeRoutes);
+
+// Server uploads folder
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res, path) => {
+      res.set("Access-Control-Allow-Origin", "http://5173");
+    },
+  })
+);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
