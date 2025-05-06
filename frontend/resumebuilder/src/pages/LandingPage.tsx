@@ -1,14 +1,16 @@
-import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
-
 import hero from "../../src/assets/heroimg.png";
 import Modal from "../components/Modal";
 import Login from "./Auth/Login";
 import SignUp from "./Auth/SignUp";
+import { UserContext } from "../context/userContext";
+import ProileInfoCard from "../components/Cards/ProileInfoCard";
 
 const LandingPage = () => {
-  // const navigate = useNavigate();
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [currentPage, setCurrentPage] = useState<"login" | "signup">("login");
@@ -20,14 +22,18 @@ const LandingPage = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-16">
           <div className="text-xl font-bold ">Resume Builder</div>
-          <Button
-            variant="secondary"
-            rounded="lg"
-            size="sm"
-            onClick={() => setOpenAuthModal(true)}
-          >
-            Login / SignUp
-          </Button>
+          {user ? (
+            <ProileInfoCard />
+          ) : (
+            <Button
+              variant="secondary"
+              rounded="lg"
+              size="sm"
+              onClick={() => setOpenAuthModal(true)}
+            >
+              Login / SignUp
+            </Button>
+          )}
         </div>
         {/* Hero Content */}
         <div className="flex flex-col md:flex-row items-center">

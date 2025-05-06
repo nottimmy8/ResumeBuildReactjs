@@ -8,16 +8,16 @@ const {
   deleteResume,
 } = require("../controllers/resumeController");
 const { protect } = require("../middlewares/authMiddleware");
-// const { uploadResumeImages } = require("../controllers/uploadImages");
+const { uploadResumeImages } = require("../controllers/uploadImages");
 
 const router = express.Router();
 
-router.post("/", protect, createResume);
-router.get("/", protect, getUserResumes);
-router.get("/:id", protect, getResumeById);
-router.put("/:id", protect, updateResume);
-// router.put("/:id/upload-images", protect, uploadResumeImages);
+router.post("/", protect, createResume); //Create Resume
+router.get("/", protect, getUserResumes); //Get Resume
+router.get("/:id", protect, getResumeById); //Get Resume By IdD
+router.put("/:id", protect, updateResume); //Update Resume
+router.put("/:id/upload-images", protect, uploadResumeImages);
 
-router.delete("/:id", protect, deleteResume);
+router.delete("/:id", protect, deleteResume); //Delete Resume
 
 module.exports = router;

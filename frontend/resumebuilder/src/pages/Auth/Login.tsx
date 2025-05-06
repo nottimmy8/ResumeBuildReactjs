@@ -1,7 +1,10 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import Input from "../../components/inputs/Input";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import { UserContext } from "../../context/userContext";
 interface Props {
   setCurrentPage: (page: "login" | "signup") => void;
 }
@@ -9,7 +12,11 @@ const Login = ({ setCurrentPage }: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  // const navigate = useNavigate();
+
+  const { updateUser } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  // Handle Login Form Submit
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email)) {
@@ -21,8 +28,23 @@ const Login = ({ setCurrentPage }: Props) => {
       return;
     }
     setError("");
+
     try {
-    } catch (error) {}
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email,
+        password,
+      });
+      const { token } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data);
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data.message) {
+        setError("Something went wrong. Please try again");
+      }
+    }
   };
 
   return (

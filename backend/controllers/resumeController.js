@@ -151,6 +151,35 @@ const updateResume = async (req, res) => {
 // @access Private
 const deleteResume = async (req, res) => {
   try {
+    const resume = await Resume.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!resume)
+      return res
+        .status(404)
+        .json({ message: "Resume not found or unauthorized" });
+    // Delete thumbnailink and profilePreviewUrl images from uploads folder
+    const uploadsFolder = path.join(__dirname, "..", "uploads");
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    if (resume.profileInfo?.profilePreviewUrl) {
+      const oldProfile = path.join(
+        uploadsFolder,
+        path.basename(resume.profileInfo.profilePreviewUrl)
+      );
+      if (fs.existsSync(oldProfile)) fs.unlinkSync(oldProfile);
+    }
+    const deleted = await Resume.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ message: "Resume not found or unauthorized" });
+    }
+    res.json({ message: "Resume deleted successfully" });
   } catch (error) {
     res
       .status(500)
