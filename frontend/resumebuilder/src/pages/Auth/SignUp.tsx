@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { validateEmail } from "../../utils/helper";
 import Input from "../../components/inputs/Input";
 import ProfilePhotoSelector from "../../components/inputs/ProfilePhotoSelector";
+import axiosInstance from "../../utils/axiosinstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/userContext";
+import uploadImage from "../../utils/uploadImage";
 
 interface Props {
   setCurrentPage: (page: "login" | "signup") => void;
@@ -13,8 +18,13 @@ const SignUp = ({ setCurrentPage }: Props) => {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+
   const [error, setError] = useState<string | null>(null);
 
+  const { updateUser } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  // handle SignUp Form Submit
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let profileImageUrl = "";
@@ -31,10 +41,34 @@ const SignUp = ({ setCurrentPage }: Props) => {
       setError("Please enter the password");
       return;
     }
+
+    setError("");
+    // Signup API call
     try {
-      // Add your signup logic here (e.g., API call)
-    } catch (error) {
-      setError("An error occurred during signup");
+      // Upload profile image if selected]
+      if (profilePic) {
+        const imgUploadRes = await uploadImage(profilePic);
+        profileImageUrl = imgUploadRes.imageUrl || "";
+      }
+
+      const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
+        name: fullName,
+        email,
+        password,
+        profileImageUrl,
+      });
+      const { token } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data);
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("An error occurred during signup");
+      }
     }
   };
 
