@@ -4,27 +4,21 @@ export const validateEmail = (email: string): boolean => {
 };
 
 // Get lightest average color
-export const getLightColorFromImage = (imageUrl: string): Promise<string> => {
+export const getLightColorFromImage = (imageUrl: string) => {
   return new Promise((resolve, reject) => {
     // Check if imageUrl is valid
     if (!imageUrl || typeof imageUrl !== "string") {
       return reject(new Error("Invalid image URL"));
     }
     const img = new Image();
-
     // If not base64 string, set crossOrigin (Important for CORS)
     if (!imageUrl.startsWith("data")) {
       img.crossOrigin = "anonymous";
     }
     img.src = imageUrl;
-
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-
-      if (!ctx) {
-        return reject(new Error("Failed to get canvas context"));
-      }
 
       canvas.width = img.width;
       canvas.height = img.height;
@@ -36,18 +30,15 @@ export const getLightColorFromImage = (imageUrl: string): Promise<string> => {
         canvas.width,
         canvas.height
       ).data;
-
       let r = 0,
         g = 0,
         b = 0,
         count = 0;
-
       for (let i = 0; i < imageData.length; i += 4) {
         const red = imageData[i];
         const green = imageData[i + 1];
         const blue = imageData[i + 2];
         const brightness = (red + green + blue) / 3;
-
         // Only count light pixels
         if (brightness > 100) {
           r += red;
@@ -56,7 +47,6 @@ export const getLightColorFromImage = (imageUrl: string): Promise<string> => {
           count++;
         }
       }
-
       if (count === 0) {
         resolve("#ffffff");
       } else {
@@ -66,7 +56,6 @@ export const getLightColorFromImage = (imageUrl: string): Promise<string> => {
         resolve(`rgb(${r},${g},${b})`);
       }
     };
-
     img.onerror = (e) => {
       console.error("Failed to load image:", e);
       reject(new Error("Image could not be loaded or is blocked by CORS"));

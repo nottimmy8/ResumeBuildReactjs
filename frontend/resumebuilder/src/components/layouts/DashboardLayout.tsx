@@ -5,7 +5,7 @@ type DashProps = {
   activeMenu?: () => void;
   children: React.ReactNode;
 };
-const DashboardLayout: React.FC<DashProps> = ({ activeMenu, children }) => {
+const DashboardLayout = ({ activeMenu, children }: DashProps) => {
   const { user } = useContext(UserContext);
   return (
     <div>
