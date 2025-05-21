@@ -16,9 +16,12 @@ import {
 import StepProgress from "../../components/StepProgress";
 import ProfileInfoForm from "../Home/Forms/ProfileInfoForm";
 import ContactInfoForm from "../Home/Forms/ContactInfoForm";
+import WorkExperienceForm from "../Home/Forms/WorkExperienceForm";
+import EducationDetailsForm from "../Home/Forms/EducationDetailsForm";
+import SkillsInfoFrom from "../Home/Forms/SkillsInfoFrom";
 
 interface ProfileInfo {
-  profileImg: File | null;
+  profileImg: File;
   profilePreviewUrl: string | null;
   profilePreview: string;
   fullName: string;
@@ -36,6 +39,7 @@ interface ContactInfo {
   phone: string;
   location: string;
   linkedin: string;
+  github: string;
   website: string;
 }
 
@@ -84,8 +88,8 @@ interface ResumeData {
   template: Template;
   contactInfo: ContactInfo;
   workExperience: WorkExperience[];
-  education: Education[];
-  skills: Skill[];
+  educationInfo: Education[];
+  skillsInfo: Skill[];
   projects: Project[];
   certification: Certification[];
   languages: Language[];
@@ -115,7 +119,7 @@ const EditResume = () => {
   const [baseWidth, setBaseWidth] = useState<number>(800);
 
   const [openPreviewModal, setOpenPreviewModal] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<string>("contact-info");
+  const [currentPage, setCurrentPage] = useState<string>("skills");
   const [progress, setProgress] = useState<number>(0);
   const [resumeData, setResumeData] = useState<ResumeData>({
     title: "",
@@ -137,6 +141,7 @@ const EditResume = () => {
       phone: "",
       location: "",
       linkedin: "",
+      github: "",
       website: "",
     },
     workExperience: [
@@ -206,7 +211,45 @@ const EditResume = () => {
             updateSection={(key, value) => {
               updateSection("contactInfo", key, value);
             }}
-            onNext={validateAndNext}
+            // onNext={validateAndNext}
+          />
+        );
+
+      case "work-experience":
+        return (
+          <WorkExperienceForm
+            workExperience={resumeData?.workExperience}
+            updateArrayItem={(index, key, value) => {
+              updateArrayItem("workExperience", index, key, value);
+            }}
+            addArrayItem={(newItem) => addArrayItem("workExperience", newItem)}
+            removeArrayItem={(index) =>
+              removeArrayItem("workExperience", index)
+            }
+          />
+        );
+
+      case "education-info":
+        return (
+          <EducationDetailsForm
+            educationInfo={resumeData?.education}
+            updateArrayItem={(index, key, value) => {
+              updateArrayItem("education", index, key, value);
+            }}
+            addArrayItem={(newItem) => addArrayItem("education", newItem)}
+            removeArrayItem={(index) => removeArrayItem("education", index)}
+          />
+        );
+
+      case "skills":
+        return (
+          <SkillsInfoFrom
+            skillsInfo={resumeData?.skills}
+            updateArrayItem={(index, key, value) => {
+              updateArrayItem("skills", index, key, value);
+            }}
+            addArrayItem={(newItem) => addArrayItem("skills", newItem)}
+            removeArrayItem={(index) => removeArrayItem("skills", index)}
           />
         );
       default:
@@ -224,11 +267,41 @@ const EditResume = () => {
     }));
   };
 
-  const updateArrayItem = () => {};
+  const updateArrayItem = (
+    section: string,
+    index: number,
+    key: string,
+    value: any
+  ) => {
+    setResumeData((prev) => {
+      const updatedArray = [...prev[section]];
+      if (key === null) {
+        updatedArray[index] = value;
+      } else {
+        updatedArray[index] = {
+          ...updatedArray[index],
+          [key]: value,
+        };
+      }
+      return {
+        ...prev,
+        [section]: updatedArray,
+      };
+    });
+  };
 
-  const addArrayItem = () => {};
+  const addArrayItem = (section: string, newItem: any) => {};
 
-  const removeArrayItem = () => {};
+  const removeArrayItem = (section: string, index: number) => {
+    setResumeData((prev) => {
+      const updatedArray = [...prev[section]];
+      updatedArray.splice(index, 1);
+      return {
+        ...prev,
+        [section]: updatedArray,
+      };
+    });
+  };
 
   const fetchResumeDetailsById = async () => {
     if (!resumeId) {
@@ -349,7 +422,7 @@ const EditResume = () => {
                 </button>
                 <button
                   className="btn-small"
-                  onClick={validateAndNext}
+                  // onClick={validateAndNext}
                   disabled={isLoading}
                 >
                   {currentPage === "additionalInfo"
