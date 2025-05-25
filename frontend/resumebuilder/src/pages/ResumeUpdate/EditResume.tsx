@@ -19,10 +19,13 @@ import ContactInfoForm from "../Home/Forms/ContactInfoForm";
 import WorkExperienceForm from "../Home/Forms/WorkExperienceForm";
 import EducationDetailsForm from "../Home/Forms/EducationDetailsForm";
 import SkillsInfoFrom from "../Home/Forms/SkillsInfoFrom";
+import ProjectsDetailForm from "../Home/Forms/ProjectsDetailForm";
+import CertificationForm from "../Home/Forms/CertificationForm";
+import AdditionalInfoForm from "../Home/Forms/AdditionalInfoForm";
 
 interface ProfileInfo {
-  profileImg: File;
-  profilePreviewUrl: string | null;
+  profileImg: File | null;
+  profilePreviewUrl: string;
   profilePreview: string;
   fullName: string;
   designation: string;
@@ -52,7 +55,7 @@ interface WorkExperience {
 }
 
 interface Education {
-  degree: string | null;
+  degree: string;
   institution: string;
   startDate: string;
   endDate: string;
@@ -119,7 +122,7 @@ const EditResume = () => {
   const [baseWidth, setBaseWidth] = useState<number>(800);
 
   const [openPreviewModal, setOpenPreviewModal] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<string>("skills");
+  const [currentPage, setCurrentPage] = useState<string>("profile-info");
   const [progress, setProgress] = useState<number>(0);
   const [resumeData, setResumeData] = useState<ResumeData>({
     title: "",
@@ -147,15 +150,15 @@ const EditResume = () => {
     workExperience: [
       { company: "", role: "", startDate: "", endDate: "", description: "" },
     ],
-    education: [
+    educationInfo: [
       {
-        degree: null,
+        degree: "",
         institution: "",
         startDate: "",
         endDate: "",
       },
     ],
-    skills: [
+    skillsInfo: [
       {
         name: null,
         progress: "",
@@ -188,9 +191,178 @@ const EditResume = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const validateAndNext = (e: React.FormEvent<HTMLFormElement>) => {};
-  const goToNextStep = () => {};
-  const goBack = () => {};
+  const validateAndNext = (
+    e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (e) e.preventDefault();
+    const errors: string[] = [];
+    // const errors = [];
+
+    switch (currentPage) {
+      case "profile-info":
+        const { fullName, designation, summary } = resumeData.profileInfo;
+        if (!fullName.trim()) errors.push("Full Name is required");
+        if (!designation.trim()) errors.push("Designation is required");
+        if (!summary.trim()) errors.push("Summary is required");
+        break;
+
+      case "contact-info":
+        const { email, phone } = resumeData.contactInfo;
+        if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email))
+          errors.push("A valid email is required.");
+        if (!phone.trim())
+          errors.push("A valid 10-digit phone number is required.");
+
+        break;
+
+      case "work-experience":
+        resumeData.workExperience.forEach(
+          ({ company, role, startDate, endDate }, index) => {
+            if (!company.trim())
+              errors.push(`Company is required in experience ${index + 1}`);
+            if (!role.trim())
+              errors.push(`Role is required in experience ${index + 1}`);
+            if (!startDate || !endDate)
+              errors.push(
+                `Start and End dates are required in experience ${index + 1}`
+              );
+          }
+        );
+        break;
+
+      case "education-info":
+        resumeData.educationInfo.forEach(
+          ({ degree, institution, startDate, endDate }, index) => {
+            if (!degree?.trim())
+              errors.push(`Degree is required in education ${index + 1}`);
+            if (!institution.trim())
+              errors.push(`Institution is required in education ${index + 1}`);
+            if (!startDate || !endDate)
+              errors.push(
+                `Start and End dates are required in education ${index + 1}`
+              );
+          }
+        );
+        break;
+
+      case "skills":
+        resumeData.skillsInfo.forEach(({ name, progress }, index) => {
+          if (!name?.trim())
+            errors.push(`Skill name is required in skill ${index + 1}`);
+          if (
+            !progress ||
+            isNaN(parseInt(progress)) ||
+            parseInt(progress) < 1 ||
+            parseInt(progress) > 100
+          )
+            errors.push(
+              `Skill progress must be between 1 and 100  in skill ${index + 1}`
+            );
+        });
+        break;
+
+      case "projects":
+        resumeData.projects.forEach(({ title, description }, index) => {
+          if (!title.trim())
+            errors.push(`Project title is required in project ${index + 1}`);
+          if (!description.trim())
+            errors.push(
+              `Project description is required in project ${index + 1}`
+            );
+        });
+        break;
+
+      case "certifications":
+        resumeData.certification.forEach(({ title, issuer, year }, index) => {
+          if (!title.trim())
+            errors.push(
+              `Certification title is required in certification ${index + 1}`
+            );
+          if (!issuer.trim())
+            errors.push(`Issuer is required in certification ${index + 1}`);
+          // if (!year.trim())
+          //   errors.push(`Year is required in certification ${index + 1}`);
+        });
+        break;
+
+      case "additionalInfo":
+        if (
+          resumeData.languages.length === 0 ||
+          !resumeData.languages[0].name?.trim()
+        ) {
+          errors.push("At least one language is required");
+        }
+
+        if (
+          resumeData.interests.length === 0 ||
+          !resumeData.interests[0]?.trim()
+        ) {
+          errors.push("At least one interest is required");
+        }
+
+      default:
+        break;
+    }
+
+    if (errors.length > 0) {
+      setErrorMsg(errors.join(", "));
+      return;
+    }
+
+    // move to next step
+    setErrorMsg(""); // Clear errors if validation passes
+    goToNextStep(); // Proceed to the next step
+  };
+
+  const goToNextStep = () => {
+    const pages = [
+      "profile-info",
+      "skills",
+      "education-info",
+      "work-experience",
+      "contact-info",
+      "projects",
+      "additionalInfo",
+      "certifications",
+    ];
+
+    if (currentPage === "additionalInfo") setOpenPreviewModal(true);
+    const currentIndex = pages.indexOf(currentPage);
+    if (currentIndex !== -1 && currentIndex < pages.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentPage(pages[nextIndex]);
+      // Set progress as percentage
+      const percent = Math.round((nextIndex / (pages.length - 1)) * 100);
+      setProgress(percent);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const goBack = () => {
+    const pages = [
+      "profile-info",
+      "skills",
+      "education-info",
+      "work-experience",
+      "contact-info",
+      "projects",
+      "additionalInfo",
+      "certifications",
+    ];
+
+    if (currentPage === "profile-info") navigate("/dashboard");
+    const currentIndex = pages.indexOf(currentPage);
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setCurrentPage(pages[prevIndex]);
+
+      // Update progress
+      const percent = Math.round((prevIndex / (pages.length - 1)) * 100);
+      setProgress(percent);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const renderForm = () => {
     switch (currentPage) {
       case "profile-info":
@@ -200,7 +372,7 @@ const EditResume = () => {
             updateSection={(key, value) => {
               updateSection("profileInfo", key, value);
             }}
-            onNext={validateAndNext}
+            // onNext={validateAndNext}
           />
         );
 
@@ -232,12 +404,12 @@ const EditResume = () => {
       case "education-info":
         return (
           <EducationDetailsForm
-            educationInfo={resumeData?.education}
+            educationInfo={resumeData?.educationInfo}
             updateArrayItem={(index, key, value) => {
-              updateArrayItem("education", index, key, value);
+              updateArrayItem("educationInfo", index, key, value);
             }}
-            addArrayItem={(newItem) => addArrayItem("education", newItem)}
-            removeArrayItem={(index) => removeArrayItem("education", index)}
+            addArrayItem={(newItem) => addArrayItem("educationInfo", newItem)}
+            removeArrayItem={(index) => removeArrayItem("educationInfo", index)}
           />
         );
 
@@ -250,6 +422,45 @@ const EditResume = () => {
             }}
             addArrayItem={(newItem) => addArrayItem("skills", newItem)}
             removeArrayItem={(index) => removeArrayItem("skills", index)}
+          />
+        );
+
+      case "projects":
+        return (
+          <ProjectsDetailForm
+            projectInfo={resumeData?.projects}
+            updateArrayItem={(index, key, value) => {
+              updateArrayItem("projects", index, key, value);
+            }}
+            addArrayItem={(newItem) => addArrayItem("projects", newItem)}
+            removeArrayItem={(index) => removeArrayItem("projects", index)}
+          />
+        );
+
+      case "certifications":
+        return (
+          <CertificationForm
+            certificationInfo={resumeData?.certification}
+            updateArrayItem={(index, key, value) => {
+              updateArrayItem("certification", index, key, value);
+            }}
+            addArrayItem={(newItem) => addArrayItem("certification", newItem)}
+            removeArrayItem={(index) => removeArrayItem("certification", index)}
+          />
+        );
+
+      case "additionalInfo":
+        return (
+          <AdditionalInfoForm
+            languages={resumeData.languages}
+            interests={resumeData.interests}
+            updateArrayItem={(section, index, key, value) => {
+              updateArrayItem(section, index, key, value);
+            }}
+            addArrayItem={(section, newItem) => addArrayItem(section, newItem)}
+            removeArrayItem={(section, index) =>
+              removeArrayItem(section, index)
+            }
           />
         );
       default:
@@ -270,7 +481,7 @@ const EditResume = () => {
   const updateArrayItem = (
     section: string,
     index: number,
-    key: string,
+    key: string | null,
     value: any
   ) => {
     setResumeData((prev) => {
@@ -290,7 +501,24 @@ const EditResume = () => {
     });
   };
 
-  const addArrayItem = (section: string, newItem: any) => {};
+  // const addArrayItem = (section: string, newItem: any) => {
+  //   setResumeData((prev) => ({
+  //     ...prev,
+  //     [section]: [...prev[section], newItem],
+  //   }));
+  // };
+  const addArrayItem = (section: string, newItem: any) => {
+    setResumeData((prev) => {
+      if (!Array.isArray(prev[section])) {
+        console.error(`Error: ${section} is not an array in resumeData`);
+        return prev; // Return unchanged state to avoid crashing
+      }
+      return {
+        ...prev,
+        [section]: [...prev[section], newItem],
+      };
+    });
+  };
 
   const removeArrayItem = (section: string, index: number) => {
     setResumeData((prev) => {
@@ -322,10 +550,11 @@ const EditResume = () => {
           contactInfo: resumeInfo.contactInfo || prevState?.contactInfo,
           workExperience:
             resumeInfo.workExperience || prevState?.workExperience,
-          education: resumeInfo.education || prevState?.education,
-          skills: resumeInfo.skills || prevState?.skills,
+          education: resumeInfo.education || prevState?.educationInfo || [],
+          skills: resumeInfo.skills || prevState?.skillsInfo || [],
           projects: resumeInfo.projects || prevState?.projects,
-          certification: resumeInfo.certification || prevState?.certification,
+          certification:
+            resumeInfo.certification || prevState?.certification || [],
           languages: resumeInfo.languages || prevState?.languages,
           interests: resumeInfo.interests || prevState?.interests,
         }));
@@ -422,7 +651,7 @@ const EditResume = () => {
                 </button>
                 <button
                   className="btn-small"
-                  // onClick={validateAndNext}
+                  onClick={(e) => validateAndNext(e)}
                   disabled={isLoading}
                 >
                   {currentPage === "additionalInfo"

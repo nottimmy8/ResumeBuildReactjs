@@ -3,7 +3,7 @@ import Input from "../../../components/inputs/Input";
 
 interface ProfileInfoFormProps {
   profileData: {
-    profileImg: File;
+    profileImg: File | null;
     profilePreview: string;
     profilePreviewUrl: string;
     fullName: string;
@@ -11,12 +11,13 @@ interface ProfileInfoFormProps {
     summary: string;
   };
   updateSection: (section: string, data: any) => void;
-  //   onNext: () => void;
+  // onNext: () => void;
 }
 const ProfileInfoForm = ({
   profileData,
   updateSection,
-}: ProfileInfoFormProps) => {
+}: // onNext,
+ProfileInfoFormProps) => {
   return (
     <div className="px-5 pt-5">
       <h2 className="text-lg font-semibold text-gray-900">
@@ -24,7 +25,7 @@ const ProfileInfoForm = ({
       </h2>
       <div className="mt-4">
         <ProfilePhotoSelector
-          image={profileData?.profileImg || profileData?.profilePreviewUrl}
+          image={profileData?.profileImg}
           setImage={(value) => updateSection("profileImg", value)}
           preview={profileData?.profilePreviewUrl}
           setPreview={(value) => updateSection("profilePreview", value)}

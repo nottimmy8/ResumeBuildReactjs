@@ -3,9 +3,9 @@ import { ChangeEvent, useState } from "react";
 interface Props {
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  label: string;
+  label?: string;
   placeholder?: string;
-  type: string;
+  type?: string;
 }
 const Input = ({ value, onChange, label, placeholder, type }: Props) => {
   const [showPassword, setShowPassword] = useState(false);
