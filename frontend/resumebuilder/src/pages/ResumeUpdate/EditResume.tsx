@@ -22,6 +22,7 @@ import SkillsInfoFrom from "../Home/Forms/SkillsInfoFrom";
 import ProjectsDetailForm from "../Home/Forms/ProjectsDetailForm";
 import CertificationForm from "../Home/Forms/CertificationForm";
 import AdditionalInfoForm from "../Home/Forms/AdditionalInfoForm";
+import RenderResume from "../../components/ResumeTemplate/RenderResume";
 
 interface ProfileInfo {
   profileImg: File | null;
@@ -501,12 +502,6 @@ const EditResume = () => {
     });
   };
 
-  // const addArrayItem = (section: string, newItem: any) => {
-  //   setResumeData((prev) => ({
-  //     ...prev,
-  //     [section]: [...prev[section], newItem],
-  //   }));
-  // };
   const addArrayItem = (section: string, newItem: any) => {
     setResumeData((prev) => {
       if (!Array.isArray(prev[section])) {
@@ -565,13 +560,21 @@ const EditResume = () => {
   };
 
   const uploadResumeImages = async () => {};
+
   const uploadResumeDetails = async (
     thumbnailLink: string,
     profilePreviewUrl: string
   ) => {};
+
   const handleDeleteResume = async () => {};
+
   const reactToPrintFn = useReactToPrint({ contentRef: resumeDownloadRef });
-  const updateBaseWidth = () => {};
+
+  const updateBaseWidth = () => {
+    if (resumeRef.current) {
+      setBaseWidth(resumeRef.current.offsetWidth);
+    }
+  };
 
   useEffect(() => {
     updateBaseWidth();
@@ -666,6 +669,13 @@ const EditResume = () => {
           </div>
           <div ref={resumeRef} className="">
             {/* Resume Template */}
+
+            <RenderResume
+              templateId={resumeData?.template?.theme || ""}
+              resumeData={resumeData}
+              colorPalette={resumeData?.template?.colorPalette || []}
+              containerWidth={baseWidth}
+            />
           </div>
         </div>
       </div>
