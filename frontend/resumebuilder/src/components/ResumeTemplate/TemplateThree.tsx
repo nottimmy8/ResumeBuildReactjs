@@ -34,7 +34,7 @@ export const Title = ({ text, color }: titleProps) => {
     </div>
   );
 };
-const TemplateOne = ({ resumeData, colorPalette, containerWidth }) => {
+const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
   const themeColors = colorPalette?.length > 0 ? colorPalette : DEFAULT_THEME;
 
   const resumeRef = useRef(null);
@@ -59,6 +59,52 @@ const TemplateOne = ({ resumeData, colorPalette, containerWidth }) => {
         height: "auto",
       }}
     >
+      <div className="flex items-start gap-5 px-2 mb-5 ">
+        <div
+          className="w-[100px] h-[100px] max-w-[105px] max-h-[105px] rounded-2xl flex items-center justify-center"
+          style={{ backgroundColor: themeColors[1] }}
+        >
+          {resumeData.profileInfo.profilePreviewUrl ? (
+            <img
+              src={resumeData.profileInfo.profilePreviewUrl}
+              className="w-[90px] h-[90px] rounded-2xl "
+            />
+          ) : (
+            <div
+              className="w-[90px] h-[90px]  flex items-center justify-center text-5xl rounded"
+              style={{ color: themeColors[4] }}
+            >
+              <LuUser />
+            </div>
+          )}
+        </div>
+        <div className="">
+          <div className="">
+            <h2 className="">{resumeData.profileInfo.fullName}</h2>
+            <p className="">{resumeData.profileInfo.designation} </p>
+
+            <ContactInfo
+              icon={<LuMapPinHouse />}
+              iconBG={themeColors[2]}
+              value={resumeData.contactInfo.location}
+            />
+          </div>
+
+          <div className="">
+            <ContactInfo
+              icon={<LuMail />}
+              iconBG={themeColors[2]}
+              value={resumeData.contactInfo.email}
+            />
+            <ContactInfo
+              icon={<LuPhone />}
+              iconBG={themeColors[2]}
+              value={resumeData.contactInfo.phone}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-12 gap-8">
         <div
           className=" col-span-4 py-10"
@@ -242,4 +288,4 @@ const TemplateOne = ({ resumeData, colorPalette, containerWidth }) => {
   );
 };
 
-export default TemplateOne;
+export default TemplateThree;

@@ -2,21 +2,23 @@ import { LuPlus, LuTrash2 } from "react-icons/lu";
 import Input from "../../../components/inputs/Input";
 import RatingInput from "../../../components/ResumeSection/RatingInput";
 
+interface Skills {
+  name: string;
+  progress: number;
+}
+
 interface skillsProps {
-  skillsInfo: {
-    name: string;
-    progress: number;
-  }[];
+  skills: Skills[];
   updateArrayItem: (
     index: number,
-    field: keyof skillsProps["skillsInfo"][number],
+    field: keyof Skills,
     value: string | number
   ) => void;
-  addArrayItem: (item: skillsProps["skillsInfo"][number]) => void;
+  addArrayItem: (item: Skills) => void;
   removeArrayItem: (index: number) => void;
 }
 const SkillsInfoFrom = ({
-  skillsInfo,
+  skills,
   updateArrayItem,
   addArrayItem,
   removeArrayItem,
@@ -26,7 +28,7 @@ const SkillsInfoFrom = ({
       <h2 className="text-lg font-semibold text-gray-900">Skills</h2>
 
       <div className="mt-4 flex flex-col gap-4 mb-3">
-        {skillsInfo.map((skill, index) => (
+        {skills.map((skill, index) => (
           <div
             key={index}
             className="border-gray-200/80 p-4 rounded-lg relative"
@@ -56,7 +58,7 @@ const SkillsInfoFrom = ({
                 </div>
               </div>
             </div>
-            {skillsInfo.length > 1 && (
+            {skills.length > 1 && (
               <button
                 type="button"
                 className="absolute top-3 right-3 text-sm text-red-600 hover:underline cursor-pointer"

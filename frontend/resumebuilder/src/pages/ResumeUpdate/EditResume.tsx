@@ -23,6 +23,14 @@ import ProjectsDetailForm from "../Home/Forms/ProjectsDetailForm";
 import CertificationForm from "../Home/Forms/CertificationForm";
 import AdditionalInfoForm from "../Home/Forms/AdditionalInfoForm";
 import RenderResume from "../../components/ResumeTemplate/RenderResume";
+import toast from "react-hot-toast";
+import {
+  captureElementAsImage,
+  dataURLtoFile,
+  fixTailwindColors,
+} from "../../utils/helper";
+import Modal from "../../components/Modal";
+import ThemeSelector from "../Home/Forms/ThemeSelector";
 
 interface ProfileInfo {
   profileImg: File | null;
@@ -63,8 +71,8 @@ interface Education {
 }
 
 interface Skill {
-  name: string | null;
-  progress: string;
+  name: string;
+  progress: number;
 }
 
 interface Project {
@@ -93,7 +101,7 @@ interface ResumeData {
   contactInfo: ContactInfo;
   workExperience: WorkExperience[];
   educationInfo: Education[];
-  skillsInfo: Skill[];
+  skills: Skill[];
   projects: Project[];
   certification: Certification[];
   languages: Language[];
@@ -115,16 +123,23 @@ interface ResumeData {
 
 const EditResume = () => {
   const { resumeId } = useParams<{ resumeId: string }>();
+
   const navigate = useNavigate();
 
   const resumeRef = useRef<HTMLDivElement>(null);
+
   const resumeDownloadRef = useRef<HTMLDivElement>(null);
 
   const [baseWidth, setBaseWidth] = useState<number>(800);
 
   const [openPreviewModal, setOpenPreviewModal] = useState<boolean>(false);
+  
+  const [openThemeSelector, setOpenThemeSelector] = useState<boolean>(false);
+
   const [currentPage, setCurrentPage] = useState<string>("profile-info");
+
   const [progress, setProgress] = useState<number>(0);
+
   const [resumeData, setResumeData] = useState<ResumeData>({
     title: "",
     thumbnailLink: "",
@@ -159,10 +174,10 @@ const EditResume = () => {
         endDate: "",
       },
     ],
-    skillsInfo: [
+    skills: [
       {
-        name: null,
-        progress: "",
+        name: "",
+        progress: 0,
       },
     ],
     projects: [
@@ -195,7 +210,7 @@ const EditResume = () => {
   const validateAndNext = (
     e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
-    if (e) e.preventDefault();
+    // if (e) e.preventDefault();
     const errors: string[] = [];
     // const errors = [];
 
@@ -247,15 +262,10 @@ const EditResume = () => {
         break;
 
       case "skills":
-        resumeData.skillsInfo.forEach(({ name, progress }, index) => {
+        resumeData.skills.forEach(({ name, progress }, index) => {
           if (!name?.trim())
             errors.push(`Skill name is required in skill ${index + 1}`);
-          if (
-            !progress ||
-            isNaN(parseInt(progress)) ||
-            parseInt(progress) < 1 ||
-            parseInt(progress) > 100
-          )
+          if (!progress || isNaN(progress) || progress < 1 || progress > 100)
             errors.push(
               `Skill progress must be between 1 and 100  in skill ${index + 1}`
             );
@@ -417,7 +427,7 @@ const EditResume = () => {
       case "skills":
         return (
           <SkillsInfoFrom
-            skillsInfo={resumeData?.skills}
+            skills={resumeData?.skills}
             updateArrayItem={(index, key, value) => {
               updateArrayItem("skills", index, key, value);
             }}
@@ -546,7 +556,7 @@ const EditResume = () => {
           workExperience:
             resumeInfo.workExperience || prevState?.workExperience,
           education: resumeInfo.education || prevState?.educationInfo || [],
-          skills: resumeInfo.skills || prevState?.skillsInfo || [],
+          skills: resumeInfo.skills || prevState?.skills || [],
           projects: resumeInfo.projects || prevState?.projects,
           certification:
             resumeInfo.certification || prevState?.certification || [],
@@ -559,12 +569,70 @@ const EditResume = () => {
     }
   };
 
-  const uploadResumeImages = async () => {};
+  const uploadResumeImages = async () => {
+    try {
+      setIsLoading(true);
+
+      fixTailwindColors(resumeRef.current);
+      const imgaeDataUrl = await captureElementAsImage(resumeRef.current);
+
+      // Convert base64 to File
+      const thumbnailFile = dataURLtoFile(
+        imgaeDataUrl,
+        `resume-${resumeId}.png`
+      );
+
+      const profileImageFile = resumeData.profileInfo.profileImg || null;
+
+      const formData = new FormData();
+      if (profileImageFile) formData.append("profileImage", profileImageFile);
+      if (thumbnailFile) formData.append("thumbnail", thumbnailFile);
+
+      const uploadResponse = await axiosInstance.put(
+        API_PATHS.RESUME.UPLOAD_IMAGES(resumeId),
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      const { thumbnailLink, profilePreviewUrl } = uploadResponse.data;
+
+      console.log("RESUME_DATA___", resumeData);
+
+      // call the second API to update other resume data
+      await updateResumeDetails(thumbnailLink, profilePreviewUrl);
+
+      toast.success("Resume updated successfully");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error uploading resume images:", error);
+      toast.error("Failed to upload resume images");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const uploadResumeDetails = async (
     thumbnailLink: string,
     profilePreviewUrl: string
-  ) => {};
+  ) => {
+    try {
+      setIsLoading(true);
+      const response = await axiosInstance.put(
+        API_PATHS.RESUME.UPDATE(resumeId),
+        {
+          ...resumeData,
+          thumbnailLink: thumbnailLink || "",
+          profileInfo: {
+            ...resumeData.profileInfo,
+            profilePreviewUrl: profilePreviewUrl || "",
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Error capturing image:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDeleteResume = async () => {};
 
@@ -667,6 +735,7 @@ const EditResume = () => {
               </div>
             </div>
           </div>
+
           <div ref={resumeRef} className="">
             {/* Resume Template */}
 
@@ -679,6 +748,25 @@ const EditResume = () => {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={openThemeSelector}
+        onClose={() => setOpenThemeSelector(false)}
+        title="Change Theme"
+      >
+        <div className="w-[90vw] h-[80vh] ">
+          <ThemeSelector
+            selectedTheme={resumeData?.template}
+            setSelectedTheme={(value) => {
+              setResumeData((prevState) => ({
+                ...prevState,
+                template: value || prevState.template,
+              }));
+            }}
+            resumeData={null}
+            onClose={() => setOpenThemeSelector(false)}
+          />
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 };
