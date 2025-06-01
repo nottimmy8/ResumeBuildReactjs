@@ -28,7 +28,8 @@ ProfileInfoFormProps) => {
           image={profileData?.profileImg}
           setImage={(value) => updateSection("profileImg", value)}
           preview={profileData?.profilePreviewUrl}
-          setPreview={(value) => updateSection("profilePreview", value)}
+          // setPreview={(value) => updateSection("profilePreview", value)}
+          setPreview={(value) => updateSection("profilePreviewUrl", value)}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input

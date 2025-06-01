@@ -1,6 +1,12 @@
 import React from "react";
 
-const ActionLink = ({ icon, link, bgColor }) => {
+type ActionLinkProps = {
+  icon: React.ReactNode;
+  link: string;
+  bgColor: string;
+};
+
+const ActionLink: React.FC<ActionLinkProps> = ({ icon, link, bgColor }) => {
   return (
     <div className="flex items-center gap-3">
       <div

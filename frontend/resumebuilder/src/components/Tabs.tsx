@@ -1,6 +1,16 @@
 import React from "react";
 
-const Tabs = ({ tabs, activeTab, setActiveTab }) => {
+type Tab = {
+  label: string;
+};
+
+interface TabsProps {
+  tabs: Tab[];
+  activeTab: string;
+  setActiveTab: (tabLabel: string) => void;
+}
+
+const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, setActiveTab }) => {
   return (
     <div className="my-2">
       <div className="flex">

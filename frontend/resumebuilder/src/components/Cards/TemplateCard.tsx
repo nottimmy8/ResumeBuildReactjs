@@ -1,6 +1,16 @@
 import React from "react";
 
-const TemplateCard = ({ thumbnailImg, isSelected, onSelect }) => {
+interface TemplateCardProps {
+  thumbnailImg?: string;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+const TemplateCard: React.FC<TemplateCardProps> = ({
+  thumbnailImg,
+  isSelected,
+  onSelect,
+}) => {
   return (
     <div
       className={`h-auto md:h-[300px] flex flex-col items-center justify-between bg-white rounded-lg border border-gray-200 hover:border-purple-300 overflow-hidden cursor-pointer ${

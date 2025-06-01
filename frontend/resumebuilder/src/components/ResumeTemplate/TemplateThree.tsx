@@ -21,6 +21,57 @@ interface titleProps {
   text: string;
   color: string;
 }
+
+interface ResumeData {
+  profileInfo: {
+    profilePreviewUrl?: string;
+    fullName: string;
+    designation: string;
+    summary: string;
+  };
+  contactInfo: {
+    location: string;
+    email: string;
+    phone: string;
+    linkedin?: string;
+    github?: string;
+    website: string;
+  };
+  educationInfo: Array<{
+    degree: string;
+    institution: string;
+    startDate: string;
+    endDate: string;
+  }>;
+  languages: Array<{ name: string; progress: number }>;
+  workExperience: Array<{
+    company: string;
+    role: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }>;
+  projects: Array<{
+    title: string;
+    description: string;
+    github: string;
+    liveDemo: string;
+  }>;
+  skills: Array<{ name: string; progress: number }>;
+  certification: Array<{
+    title: string;
+    issuer: string;
+    year: string;
+  }>;
+  interests?: string[];
+}
+
+interface TemplateThreeProps {
+  resumeData: ResumeData;
+  colorPalette?: string[];
+  containerWidth: number;
+}
+
 const DEFAULT_THEME = ["#EBFDFF", "#A1F4FD", "#CEFAFE", "00BBDB", "#4A5565"];
 
 export const Title = ({ text, color }: titleProps) => {
@@ -34,18 +85,24 @@ export const Title = ({ text, color }: titleProps) => {
     </div>
   );
 };
-const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
-  const themeColors = colorPalette?.length > 0 ? colorPalette : DEFAULT_THEME;
+const TemplateThree = ({
+  resumeData,
+  colorPalette,
+  containerWidth,
+}: TemplateThreeProps) => {
+  const themeColors: string[] =
+    colorPalette && colorPalette.length > 0 ? colorPalette : DEFAULT_THEME;
 
-  const resumeRef = useRef(null);
-  const [baseWidth, setBaseWidth] = useState(800);
-  const [scale, setScale] = useState(1);
+  const resumeRef = useRef<HTMLDivElement>(null);
+  const [baseWidth, setBaseWidth] = useState<number>(800);
+  const [scale, setScale] = useState<number>(1);
 
   useEffect(() => {
-    // Calculate the scale factor based on the container width
-    const actualBaseWidth = resumeRef.current.offsetWidth;
-    setBaseWidth(actualBaseWidth);
-    setScale(containerWidth / baseWidth);
+    if (resumeRef.current) {
+      const actualBaseWidth = resumeRef.current.offsetWidth;
+      setBaseWidth(actualBaseWidth);
+      setScale(containerWidth / actualBaseWidth);
+    }
   }, [containerWidth]);
 
   return (
@@ -67,21 +124,25 @@ const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
           {resumeData.profileInfo.profilePreviewUrl ? (
             <img
               src={resumeData.profileInfo.profilePreviewUrl}
-              className="w-[90px] h-[90px] rounded-2xl "
+              className="w-[90px] h-[90px] rounded-full"
             />
           ) : (
             <div
-              className="w-[90px] h-[90px]  flex items-center justify-center text-5xl rounded"
+              className="w-[90px] h-[90px] flex items-center justify-center text-5xl rounded-full"
               style={{ color: themeColors[4] }}
             >
               <LuUser />
             </div>
           )}
         </div>
-        <div className="">
-          <div className="">
-            <h2 className="">{resumeData.profileInfo.fullName}</h2>
-            <p className="">{resumeData.profileInfo.designation} </p>
+        <div className="grid grid-cols-12 items-center">
+          <div className="col-span-8">
+            <h2 className="text-2xl font-bold">
+              {resumeData.profileInfo.fullName}
+            </h2>
+            <p className="text-[15px] font-semibold mb-2 ">
+              {resumeData.profileInfo.designation}{" "}
+            </p>
 
             <ContactInfo
               icon={<LuMapPinHouse />}
@@ -90,7 +151,7 @@ const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
             />
           </div>
 
-          <div className="">
+          <div className="col-span-4 flex flex-col gap-5 mt-2">
             <ContactInfo
               icon={<LuMail />}
               iconBG={themeColors[2]}
@@ -110,36 +171,9 @@ const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
           className=" col-span-4 py-10"
           style={{ backgroundColor: themeColors[0] }}
         >
-          <div className="flex flex-col items-center px-2 ">
-            <div
-              className="w-[100px] h-1[110px] max-h-[110px] rounded-full flex items-center justify-center "
-              style={{ backgroundColor: themeColors[1] }}
-            >
-              {resumeData.profileInfo.profilePreviewUrl ? (
-                <img
-                  src={resumeData.profileInfo.profilePreviewUrl}
-                  className="w-[90px] h-[90px] rounded-full"
-                />
-              ) : (
-                <div
-                  className="w-[90px] h-[90px] flex items-center justify-center text-5xl rounded-full"
-                  style={{ color: themeColors[4] }}
-                >
-                  <LuUser />{" "}
-                </div>
-              )}
-            </div>
-            <h2 className="text-xl font-bold mt-3">
-              {resumeData.profileInfo.fullName}
-            </h2>
-            <p className="text-sm text-center">
-              {resumeData.profileInfo.designation}{" "}
-            </p>
-          </div>
-
           <div className="my-6 mx-6">
             <div className="flex flex-col gap-4">
-              <ContactInfo
+              {/* <ContactInfo
                 icon={<LuMapPinHouse />}
                 iconBG={themeColors[2]}
                 value={resumeData.contactInfo.location}
@@ -153,7 +187,7 @@ const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
                 icon={<LuPhone />}
                 iconBG={themeColors[2]}
                 value={resumeData.contactInfo.phone}
-              />
+              />*/}
               {resumeData.contactInfo.linkedin && (
                 <ContactInfo
                   icon={<RiLinkedinLine />}
@@ -226,7 +260,7 @@ const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
           </div>
 
           <div className="mt-4">
-            <Title text="Projects" color={themeColors} />
+            <Title text="Projects" color={themeColors[1]} />
 
             {resumeData.projects.map((project, index) => (
               <ProjectInfo
@@ -262,7 +296,8 @@ const TemplateThree = ({ resumeData, colorPalette, containerWidth }) => {
             ))}
           </div>
 
-          {resumeData.interests?.length > 0 &&
+          {resumeData.interests &&
+            resumeData.interests?.length > 0 &&
             resumeData.interests[0] != "" && (
               <div className="mt-4">
                 <Title text="Interests" color={themeColors[1]} />

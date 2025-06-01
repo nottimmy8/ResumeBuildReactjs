@@ -4,11 +4,12 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import TitleInput from "../../components/inputs/TitleInput";
 import { useReactToPrint } from "react-to-print";
 import axiosInstance from "../../utils/axiosinstance";
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { API_PATHS } from "../../utils/apiPaths";
 import {
   LuArrowLeft,
   LuCircleAlert,
+  LuDownload,
   LuPalette,
   LuSave,
   LuTrash,
@@ -43,9 +44,8 @@ interface ProfileInfo {
 
 interface Template {
   theme: string;
-  colorPalette: string;
+  colorPalette: string[];
 }
-
 interface ContactInfo {
   email: string;
   phone: string;
@@ -133,12 +133,12 @@ const EditResume = () => {
   const [baseWidth, setBaseWidth] = useState<number>(800);
 
   const [openPreviewModal, setOpenPreviewModal] = useState<boolean>(false);
-  
+
   const [openThemeSelector, setOpenThemeSelector] = useState<boolean>(false);
 
   const [currentPage, setCurrentPage] = useState<string>("profile-info");
 
-  const [progress, setProgress] = useState<number>(0);
+  const [_progress, setProgress] = useState<number>(0);
 
   const [resumeData, setResumeData] = useState<ResumeData>({
     title: "",
@@ -153,7 +153,7 @@ const EditResume = () => {
     },
     template: {
       theme: "",
-      colorPalette: "",
+      colorPalette: [],
     },
     contactInfo: {
       email: "",
@@ -207,12 +207,9 @@ const EditResume = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const validateAndNext = (
-    e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
-  ) => {
-    // if (e) e.preventDefault();
+  const validateAndNext = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     const errors: string[] = [];
-    // const errors = [];
 
     switch (currentPage) {
       case "profile-info":
@@ -291,8 +288,8 @@ const EditResume = () => {
             );
           if (!issuer.trim())
             errors.push(`Issuer is required in certification ${index + 1}`);
-          // if (!year.trim())
-          //   errors.push(`Year is required in certification ${index + 1}`);
+          if (!year.trim())
+            errors.push(`Year is required in certification ${index + 1}`);
         });
         break;
 
@@ -310,6 +307,7 @@ const EditResume = () => {
         ) {
           errors.push("At least one interest is required");
         }
+        break;
 
       default:
         break;
@@ -333,8 +331,8 @@ const EditResume = () => {
       "work-experience",
       "contact-info",
       "projects",
-      "additionalInfo",
       "certifications",
+      "additionalInfo",
     ];
 
     if (currentPage === "additionalInfo") setOpenPreviewModal(true);
@@ -550,7 +548,12 @@ const EditResume = () => {
         setResumeData((prevState) => ({
           ...prevState,
           title: resumeInfo.title || "Untitled",
-          template: resumeInfo.template || prevState?.template,
+          template: {
+            theme: resumeInfo.template?.theme || prevState?.template.theme,
+            colorPalette: Array.isArray(resumeInfo.template?.colorPalette)
+              ? resumeInfo.template.colorPalette
+              : [],
+          },
           profileInfo: resumeInfo.profileInfo || prevState?.profileInfo,
           contactInfo: resumeInfo.contactInfo || prevState?.contactInfo,
           workExperience:
@@ -569,42 +572,110 @@ const EditResume = () => {
     }
   };
 
+  // const uploadResumeImages = async () => {
+  //   try {
+  //     setIsLoading(true);
+
+  //     fixTailwindColors(resumeRef.current);
+  //     const imgaeDataUrl = await captureElementAsImage(resumeRef.current);
+
+  //     // Convert base64 to File
+  //     const thumbnailFile = dataURLtoFile(
+  //       imgaeDataUrl,
+  //       `resume-${resumeId}.png`
+  //     );
+
+  //     const profileImageFile = resumeData.profileInfo.profileImg || null;
+
+  //     const formData = new FormData();
+  //     if (profileImageFile) formData.append("profileImage", profileImageFile);
+  //     if (thumbnailFile) formData.append("thumbnail", thumbnailFile);
+
+  //     const uploadResponse = await axiosInstance.put(
+  //       API_PATHS.RESUME.UPLOAD_IMAGES(resumeId!),
+  //       formData,
+  //       { headers: { "Content-Type": "multipart/form-data" } }
+  //     );
+  //     const { thumbnailLink, profilePreviewUrl } = uploadResponse.data;
+
+  //     console.log("RESUME_DATA___", resumeData);
+
+  //     // call the second API to update other resume data
+  //     await uploadResumeDetails(thumbnailLink, profilePreviewUrl);
+
+  //     toast.success("Resume updated successfully");
+  //     navigate("/dashboard");
+  //   } catch (error) {
+  //     console.error("Error uploading resume images:", error);
+  //     toast.error("Failed to upload resume images");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const uploadResumeImages = async () => {
     try {
       setIsLoading(true);
+      if (!resumeId) {
+        throw new Error("Resume ID is missing");
+      }
+      if (!resumeRef.current) {
+        throw new Error("Resume element is not available");
+      }
 
+      console.log("Axios baseURL:", axiosInstance.defaults.baseURL); // Log base URL
+      console.log("resumeId:", resumeId); // Log resumeId
+      console.log("resumeRef.current:", resumeRef.current);
       fixTailwindColors(resumeRef.current);
-      const imgaeDataUrl = await captureElementAsImage(resumeRef.current);
+      const imageDataUrl = await captureElementAsImage(resumeRef.current);
+      console.log("imageDataUrl:", imageDataUrl);
+      if (!imageDataUrl.startsWith("data:image/png")) {
+        throw new Error("Invalid image data URL");
+      }
 
-      // Convert base64 to File
       const thumbnailFile = dataURLtoFile(
-        imgaeDataUrl,
+        imageDataUrl,
         `resume-${resumeId}.png`
       );
-
       const profileImageFile = resumeData.profileInfo.profileImg || null;
 
       const formData = new FormData();
       if (profileImageFile) formData.append("profileImage", profileImageFile);
       if (thumbnailFile) formData.append("thumbnail", thumbnailFile);
 
-      const uploadResponse = await axiosInstance.put(
-        API_PATHS.RESUME.UPLOAD_IMAGES(resumeId),
+      console.log("formData entries:", Array.from(formData.entries()));
+      const url = `${axiosInstance.defaults.baseURL}${API_PATHS.IMAGE.UPLOAD_IMAGE}`;
+      console.log("Full API URL:", url); // Log full URL
+
+      const uploadResponse = await axiosInstance.post(
+        API_PATHS.IMAGE.UPLOAD_IMAGE, // Use /api/auth/upload-image
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      const { thumbnailLink, profilePreviewUrl } = uploadResponse.data;
+      console.log("uploadResponse:", uploadResponse.data);
+      // Adjust response handling based on /api/auth/upload-image response format
+      const { thumbnailLink, profilePreviewUrl } = uploadResponse.data; // Update if response differs
 
-      console.log("RESUME_DATA___", resumeData);
-
-      // call the second API to update other resume data
-      await updateResumeDetails(thumbnailLink, profilePreviewUrl);
+      await uploadResumeDetails(thumbnailLink || "", profilePreviewUrl || "");
 
       toast.success("Resume updated successfully");
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error uploading resume images:", error);
-      toast.error("Failed to upload resume images");
+      if (error instanceof Error) {
+        console.error("Error uploading resume images:", error.message, error);
+        toast.error(
+          `Failed to upload resume images: ${
+            (error as any).response?.data?.message || error.message
+          }`
+        );
+        // Fallback: Save resume without images
+        await uploadResumeDetails("", "");
+        // toast.warn("Resume saved without images");
+        navigate("/dashboard");
+      } else {
+        console.error("Error uploading resume images:", error);
+        toast.error("Failed to upload resume images");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -616,17 +687,14 @@ const EditResume = () => {
   ) => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.put(
-        API_PATHS.RESUME.UPDATE(resumeId),
-        {
-          ...resumeData,
-          thumbnailLink: thumbnailLink || "",
-          profileInfo: {
-            ...resumeData.profileInfo,
-            profilePreviewUrl: profilePreviewUrl || "",
-          },
-        }
-      );
+      await axiosInstance.put(API_PATHS.RESUME.UPDATE(resumeId!), {
+        ...resumeData,
+        thumbnailLink: thumbnailLink || "",
+        profileInfo: {
+          ...resumeData.profileInfo,
+          profilePreviewUrl: profilePreviewUrl || "",
+        },
+      });
     } catch (err) {
       console.error("Error capturing image:", err);
     } finally {
@@ -634,7 +702,21 @@ const EditResume = () => {
     }
   };
 
-  const handleDeleteResume = async () => {};
+  const handleDeleteResume = async () => {
+    try {
+      setIsLoading(true);
+      if (!resumeId) {
+        throw new Error("Resume ID is missing");
+      }
+      await axiosInstance.delete(API_PATHS.RESUME.DELETE(resumeId!));
+      toast.success("Resume Deleted Successfully");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Error capturing image:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const reactToPrintFn = useReactToPrint({ contentRef: resumeDownloadRef });
 
@@ -686,7 +768,7 @@ const EditResume = () => {
               className="btn-small-light"
               onClick={() => setOpenPreviewModal(true)}
             >
-              <LuPalette className="text-[16px]" />
+              <LuDownload className="text-[16px]" />
               <span className="hidden md:block">Preview & Download</span>
             </button>
           </div>
@@ -748,13 +830,14 @@ const EditResume = () => {
           </div>
         </div>
       </div>
+
       <Modal
         isOpen={openThemeSelector}
         onClose={() => setOpenThemeSelector(false)}
         title="Change Theme"
       >
         <div className="w-[90vw] h-[80vh] ">
-          <ThemeSelector
+          {/* <ThemeSelector
             selectedTheme={resumeData?.template}
             setSelectedTheme={(value) => {
               setResumeData((prevState) => ({
@@ -764,6 +847,41 @@ const EditResume = () => {
             }}
             resumeData={null}
             onClose={() => setOpenThemeSelector(false)}
+          /> */}
+          <ThemeSelector
+            selectedTheme={resumeData.template}
+            setSelectedTheme={(
+              value: Template | null | ((prev: Template) => Template)
+            ) =>
+              setResumeData((prevState) => ({
+                ...prevState,
+                template:
+                  typeof value === "function"
+                    ? value(prevState.template)
+                    : value || prevState.template,
+              }))
+            }
+            resumeData={resumeData}
+            onClose={() => setOpenThemeSelector(false)}
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={openPreviewModal}
+        onClose={() => setOpenPreviewModal(false)}
+        title={resumeData.title}
+        showActionBtn
+        actionBtnText="Download"
+        actionBtnIcon={<LuDownload className="text-[16px] " />}
+        onActionClick={() => reactToPrintFn()}
+      >
+        <div ref={resumeDownloadRef} className="w-[90vw] h-[90vh] ">
+          <RenderResume
+            templateId={resumeData?.template?.theme || ""}
+            resumeData={resumeData}
+            colorPalette={resumeData?.template?.colorPalette || []}
+            // containerWidth={baseWidth}
           />
         </div>
       </Modal>

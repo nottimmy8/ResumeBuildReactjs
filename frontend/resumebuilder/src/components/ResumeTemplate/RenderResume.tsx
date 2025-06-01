@@ -3,7 +3,14 @@ import TemplateOne from "./TemplateOne";
 import TemplateThree from "./TemplateThree";
 import TemplateTwo from "./TemplateTwo";
 
-const RenderResume = ({
+interface RenderResumeProps {
+  templateId: string;
+  resumeData: any;
+  colorPalette: any;
+  containerWidth: number;
+}
+
+const RenderResume: React.FC<RenderResumeProps> = ({
   templateId,
   resumeData,
   colorPalette,

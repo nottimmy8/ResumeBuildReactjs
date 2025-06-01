@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IoColorPalette } from "react-icons/io5";
+
 import Tabs from "../../../components/Tabs";
 import { LuCircleCheckBig } from "react-icons/lu";
 import {
@@ -10,6 +10,26 @@ import {
 import TemplateCard from "../../../components/Cards/TemplateCard";
 import RenderResume from "../../../components/ResumeTemplate/RenderResume";
 
+interface Theme {
+  colorPalette?: string[];
+  theme?: string;
+}
+
+interface ThemeSelectorProps {
+  selectedTheme: Theme | undefined;
+  setSelectedTheme: React.Dispatch<
+    React.SetStateAction<{ colorPalette: string[]; theme: string }>
+  >;
+  resumeData: any; // Replace with specific ResumeData interface if available
+  onClose: () => void;
+}
+
+interface ColorPaletteProps {
+  colors: string[];
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
 const TAB_DATA = [{ label: "Templates" }, { label: "Color Palettes" }];
 
 const ThemeSelector = ({
@@ -17,13 +37,16 @@ const ThemeSelector = ({
   setSelectedTheme,
   resumeData,
   onClose,
-}) => {
+}: ThemeSelectorProps) => {
   const resumeRef = useRef<HTMLDivElement>(null);
   const [baseWidth, setBaseWidth] = useState(800);
 
   const [tabValue, setTabValue] = useState("Templates");
-  const [selectedColorPalette, setSelectedColorPalette] = useState({
-    colors: selectedTheme?.colorPalette || "",
+  const [selectedColorPalette, setSelectedColorPalette] = useState<{
+    colors: string[];
+    index: number;
+  }>({
+    colors: selectedTheme?.colorPalette || [],
     index: -1,
   });
   const [selectedTemplate, setSelectedTemplate] = useState({
@@ -111,14 +134,14 @@ const ThemeSelector = ({
 
 export default ThemeSelector;
 
-const ColorPalette = ({ colors, isSelected, onSelect }) => {
+const ColorPalette = ({ colors, isSelected, onSelect }: ColorPaletteProps) => {
   return (
     <div
       className={`h-28 bg-purple-50 flex rounded-lg overflow-hidden border-2 ${
         isSelected ? "border-purple-500" : "border-none"
       }`}
     >
-      {colors.map((color, index) => (
+      {colors.map((_color, index) => (
         <div
           key={`color_${index}`}
           className="flex-1"

@@ -1,6 +1,12 @@
 import React from "react";
 
-const ContactInfo = ({ icon, iconBG, value }) => {
+type ContactInfoProps = {
+  icon: React.ReactNode;
+  iconBG: string;
+  value: string;
+};
+
+const ContactInfo: React.FC<ContactInfoProps> = ({ icon, iconBG, value }) => {
   return (
     <div className="flex items-center gap-3 ">
       <div

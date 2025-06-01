@@ -1,6 +1,15 @@
-import React from "react";
-
-const Progress = ({ progress = 0, total = 5, color, bgColor }) => {
+interface ProgressProps {
+  progress: number;
+  total?: number;
+  color: string;
+  bgColor: string;
+}
+const Progress = ({
+  progress = 0,
+  total = 5,
+  color,
+  bgColor,
+}: ProgressProps) => {
   return (
     <div className="flex gap-1.5">
       {[...Array(total)].map((_, index) => (

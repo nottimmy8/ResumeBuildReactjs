@@ -32,7 +32,7 @@ app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, path) => {
-      res.set("Access-Control-Allow-Origin", "http://5173");
+      res.set("Access-Control-Allow-Origin", "http://5174");
     },
   })
 );

@@ -1,6 +1,13 @@
-import React from "react";
 import { LuExternalLink, LuGithub } from "react-icons/lu";
 import ActionLink from "./ActionLink";
+interface ProjectProps {
+  title: string;
+  description: string;
+  githubLink: string;
+  liveDemoUrl: string;
+  bgColor: string;
+  isPreview?: boolean;
+}
 
 const ProjectInfo = ({
   title,
@@ -9,7 +16,7 @@ const ProjectInfo = ({
   liveDemoUrl,
   bgColor,
   isPreview,
-}) => {
+}: ProjectProps) => {
   return (
     <div className="mb-5">
       <h3

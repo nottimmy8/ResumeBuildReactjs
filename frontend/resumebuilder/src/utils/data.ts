@@ -115,5 +115,5 @@ export const DUMMY_RESUME_DATA = {
       progress: 70,
     },
   ],
-  intrests: ["Reading", "Open Source Contribution", "Hiking"],
+  interests: ["Reading", "Open Source Contribution", "Hiking"],
 };

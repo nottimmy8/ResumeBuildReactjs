@@ -1,12 +1,29 @@
 import Progress from "../Progress";
 
+interface Language {
+  name: string;
+  progress: number;
+}
+
 interface Props {
-  languages: string;
+  languages: Language[];
   accentColor: string;
   bgColor: string;
 }
 
-const LanguageInfo = ({ language, progress, accentColor, bgColor }) => {
+interface LanguageInfoProps {
+  language: string;
+  progress: number;
+  accentColor: string;
+  bgColor: string;
+}
+
+const LanguageInfo: React.FC<LanguageInfoProps> = ({
+  language,
+  progress,
+  accentColor,
+  bgColor,
+}) => {
   return (
     <div className="flex items-center justify-between">
       <p className={`text-[12px] font-semibold text-gray-900 `}>{language}</p>

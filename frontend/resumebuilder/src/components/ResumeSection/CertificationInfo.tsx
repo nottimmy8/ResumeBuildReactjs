@@ -1,6 +1,18 @@
 import React from "react";
 
-const CertificationInfo = ({ title, issuer, year, bgColor }) => {
+interface CertificationInfoProps {
+  title: string;
+  issuer: string;
+  year?: string | number;
+  bgColor?: string;
+}
+
+const CertificationInfo: React.FC<CertificationInfoProps> = ({
+  title,
+  issuer,
+  year,
+  bgColor,
+}) => {
   return (
     <div className="">
       <h3 className={`text-[15px] font-semibold text-gray-900`}>{title}</h3>

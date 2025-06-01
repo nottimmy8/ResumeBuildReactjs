@@ -1,6 +1,14 @@
 import React from "react";
 
-const WorkExperience = ({
+type WorkExperienceProps = {
+  company: string;
+  duration: string;
+  durationColor?: string;
+  role: string;
+  description: string;
+};
+
+const WorkExperience: React.FC<WorkExperienceProps> = ({
   company,
   duration,
   durationColor,
