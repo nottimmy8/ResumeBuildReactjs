@@ -42,7 +42,7 @@ const ResumeSummaryCard = ({ imgUrl, title, lastUpdated, onSelect }: Props) => {
           {title}
         </h5>
         <p className="text-xs font-medium text-gray-500 mt-0.5">
-          Last Updated:{lastUpdated}{" "}
+          Last Updated:{lastUpdated}
         </p>
       </div>
     </div>
