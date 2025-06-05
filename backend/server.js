@@ -11,9 +11,9 @@ const app = express();
 // Middleware to handle CORS
 app.use(
   cors({
-    origin: process.env.CLINET_URL || "*",
+    origin: process.env.CLINET_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -28,11 +28,19 @@ app.use("/api/auth", authRoutes);
 app.use("/api/resume", resumeRoutes);
 
 // Server uploads folder
+// app.use(
+//   "/uploads",
+//   express.static(path.join(__dirname, "uploads"), {
+//     setHeaders: (res, path) => {
+//       res.set("Access-Control-Allow-Origin", "http://5174");
+//     },
+//   })
+// );
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, path) => {
-      res.set("Access-Control-Allow-Origin", "http://5174");
+      res.set("Access-Control-Allow-Origin", process.env.CLIENT_URL);
     },
   })
 );
