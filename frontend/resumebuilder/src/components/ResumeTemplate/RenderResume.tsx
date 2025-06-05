@@ -6,7 +6,7 @@ import TemplateTwo from "./TemplateTwo";
 interface RenderResumeProps {
   templateId: string;
   resumeData: any;
-  colorPalette: any;
+  colorPalette: string[];
   containerWidth: number;
 }
 

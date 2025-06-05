@@ -20,7 +20,7 @@ interface ThemeSelectorProps {
   setSelectedTheme: React.Dispatch<
     React.SetStateAction<{ colorPalette: string[]; theme: string }>
   >;
-  resumeData: any; // Replace with specific ResumeData interface if available
+  resumeData: any;
   onClose: () => void;
 }
 
