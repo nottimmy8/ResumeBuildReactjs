@@ -881,7 +881,7 @@ const EditResume = () => {
             templateId={resumeData?.template?.theme || ""}
             resumeData={resumeData}
             colorPalette={resumeData?.template?.colorPalette || []}
-            // containerWidth={baseWidth}
+            containerWidth={baseWidth}
           />
         </div>
       </Modal>
