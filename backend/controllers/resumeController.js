@@ -163,6 +163,14 @@ const deleteResume = async (req, res) => {
     const uploadsFolder = path.join(__dirname, "..", "uploads");
     const baseUrl = `${req.protocol}://${req.get("host")}`;
 
+    if (resume.thumbnailLink) {
+      const oldThumbnail = path.join(
+        uploadsFolder,
+        path.basename(resume.thumbnailLink)
+      );
+      if (fs.existsSync(oldThumbnail)) fs.unlinkSync(oldThumbnail);
+    }
+
     if (resume.profileInfo?.profilePreviewUrl) {
       const oldProfile = path.join(
         uploadsFolder,
